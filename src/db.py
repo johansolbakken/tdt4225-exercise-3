@@ -34,6 +34,9 @@ def init():
     client = connector.client
     db = connector.db
 
+    user = db["user"]
+    user.insert_one({"_id": "1", "has_labels": False})
+
     initiated = True
 
 def shutdown():
@@ -53,15 +56,18 @@ def nuke_database():
     global db
     check_initiated()
     _ = performance.Timer("(Database) Nuking database")
+    db.drop_collection("user")
+    db.drop_collection("activity")
+    db.drop_collection("trackpoint")
 
 def tables_exist():
-    assert False, "Todo: not implemented"
-    global cursor
+    global db
     check_initiated()
     _ = performance.Timer("(Database) Checking if tables exist")
-    cursor.execute("SHOW TABLES")
-    tables = cursor.fetchall()
-    return len(tables) == 3
+    users_exist = "user" in db.list_collection_names()
+    activities_exist = "activity" in db.list_collection_names()
+    trackpoints_exist = "trackpoint" in db.list_collection_names()
+    return users_exist and activities_exist and trackpoints_exist
 
 # -------------- Part 2 --------------
 

@@ -23,12 +23,11 @@ class DbConnector:
 
     def __init__(self,
                  DATABASE='nihaodb',
-                 HOST="mongo",
+                 HOST="localhost",
                  USER="root",
                  PASSWORD="example"):
-        uri = "mongodb://%s:%s@%s:27017/%s" % (USER, PASSWORD, HOST, DATABASE)
-        uri = "mongodb://localhost:27017" # we have to use this because of docker. #TODO(johan): fix this?
-        # Connect to the databases
+        uri = "mongodb://%s:%s@%s:27017" % (USER, PASSWORD, HOST)
+        # Connect to the databases 🇪🇸🇪🇸🇪🇸🇪🇸🇪🇸🇪🇸🇪🇸🇪🇸🇪🇸🇪🇸
         try:
             self.client = MongoClient(uri)
             self.db = self.client[DATABASE]
@@ -43,3 +42,8 @@ class DbConnector:
         # close the DB connection
         self.client.close()
         log.info(f"(Database) Connection to {self.db.name}-db is closed")
+
+        #MUCHAS GRACIAS AFICION
+        # asdkajsdkaswfdliaqbefabwefklhjbawkdfblkdfbjklwabfjkawlesfblasdbwlfkabslkdfhb
+        # hubby
+        
