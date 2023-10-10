@@ -27,12 +27,7 @@ def init():
     global initiated, connector, client, db
     _ = performance.Timer("(Database) Database init")
     try:
-        connector = dbconnection.DbConnector(
-            HOST="mongo",
-            DATABASE="nihaodb",
-            USER="root",
-            PASSWORD="example",
-        )
+        connector = dbconnection.DbConnector()
     except Exception as e:
         log.error(f"(Database) Failed to connect to database. {e}")
 
@@ -55,37 +50,9 @@ def check_initiated():
         raise Exception("(Database) Not initiated. Call db.init() first.")
 
 def nuke_database():
-    assert False, "Todo: not implemented"
-    global cursor
+    global db
     check_initiated()
     _ = performance.Timer("(Database) Nuking database")
-
-    try:
-        for name, _, drop in Queries.indexes:
-            cursor.execute(drop)
-            log.info(f"(Database) Dropped index {name}")
-
-        cursor.execute("DROP TABLE IF EXISTS trackpoint")
-        cursor.execute("DROP TABLE IF EXISTS activity")
-        cursor.execute("DROP TABLE IF EXISTS user")
-
-    except Exception as e:
-        log.error(f"(Database) Failed to nuke database. {e}")
-        exit(1)
-
-def create_tables():
-    assert False, "Todo: not implemented"
-    global cursor
-    check_initiated()
-    _ = performance.Timer("(Database) Creating tables")
-
-    cursor.execute(Queries.create_user_table)
-    cursor.execute(Queries.create_activity_table)
-    cursor.execute(Queries.create_trackpoint_table)
-
-    for name,create,_ in Queries.indexes:
-        cursor.execute(create)
-        log.info(f"(Database) Created index {name}")
 
 def tables_exist():
     assert False, "Todo: not implemented"

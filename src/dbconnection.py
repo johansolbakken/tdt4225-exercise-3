@@ -26,7 +26,8 @@ class DbConnector:
                  HOST="mongo",
                  USER="root",
                  PASSWORD="example"):
-        uri = "mongodb://%s:%s@%s/%s" % (USER, PASSWORD, HOST, DATABASE)
+        uri = "mongodb://%s:%s@%s:27017/%s" % (USER, PASSWORD, HOST, DATABASE)
+        uri = "mongodb://localhost:27017" # we have to use this because of docker. #TODO(johan): fix this?
         # Connect to the databases
         try:
             self.client = MongoClient(uri)
