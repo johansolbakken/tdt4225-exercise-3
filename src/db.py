@@ -19,25 +19,25 @@ Singleton database connection
 
 initiated: bool = False
 connector: dbconnection.DbConnector = None
-cursor = None
-db_connection = None
+client = None
+db = None
 
 
 def init():
-    global initiated, connector, cursor, db_connection
+    global initiated, connector, client, db
     _ = performance.Timer("(Database) Database init")
     try:
         connector = dbconnection.DbConnector(
-            HOST="localhost",
-            DATABASE="example",
-            USER="example",
+            HOST="mongo",
+            DATABASE="nihaodb",
+            USER="root",
             PASSWORD="example",
         )
     except Exception as e:
         log.error(f"(Database) Failed to connect to database. {e}")
 
-    cursor = connector.cursor
-    db_connection = connector.db_connection
+    client = connector.client
+    db = connector.db
 
     initiated = True
 
@@ -49,11 +49,13 @@ def shutdown():
     initiated = False
 
 def check_initiated():
+    global initiated
     if initiated == False:
         log.error("(Database) Not initiated. Call db.init() first.")
         raise Exception("(Database) Not initiated. Call db.init() first.")
 
 def nuke_database():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Nuking database")
@@ -72,6 +74,7 @@ def nuke_database():
         exit(1)
 
 def create_tables():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Creating tables")
@@ -85,6 +88,7 @@ def create_tables():
         log.info(f"(Database) Created index {name}")
 
 def tables_exist():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Checking if tables exist")
@@ -96,6 +100,7 @@ def tables_exist():
 
 # 1
 def get_number_of_users():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting number of users")
@@ -103,6 +108,7 @@ def get_number_of_users():
     return cursor.fetchone()[0]
 
 def get_number_of_activities():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting number of activities")
@@ -110,6 +116,7 @@ def get_number_of_activities():
     return cursor.fetchone()[0]
 
 def get_number_of_trackpoints():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting number of trackpoints")
@@ -119,6 +126,7 @@ def get_number_of_trackpoints():
 # 2 
 
 def get_average_trackpoints_per_user():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting average trackpoints per user")
@@ -126,6 +134,7 @@ def get_average_trackpoints_per_user():
     return cursor.fetchone()[0]
 
 def get_max_trackpoints_per_user():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting max trackpoints per user")
@@ -133,6 +142,7 @@ def get_max_trackpoints_per_user():
     return cursor.fetchone()[0]
 
 def get_min_trackpoints_per_user():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting min trackpoints per user")
@@ -141,6 +151,7 @@ def get_min_trackpoints_per_user():
 
 # 3
 def get_top_users_most_activites(n:int):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting top users with most activities")
@@ -149,6 +160,7 @@ def get_top_users_most_activites(n:int):
 
 # 4
 def get_all_users_that_used(transportation_mode: str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all users that have taken the bus")
@@ -157,6 +169,7 @@ def get_all_users_that_used(transportation_mode: str):
 
 # 5
 def get_top_users_with_the_most_different_transportation_modes(n:int):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting top users with the most different transportation modes")
@@ -165,6 +178,7 @@ def get_top_users_with_the_most_different_transportation_modes(n:int):
 
 # 6
 def get_all_duplicate_activities():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all duplicate activities")
@@ -173,6 +187,7 @@ def get_all_duplicate_activities():
 
 # 7
 def get_amount_of_users_with_activities_lasting_to_next_day():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting amount of users with activities lasting to next day")
@@ -180,6 +195,7 @@ def get_amount_of_users_with_activities_lasting_to_next_day():
     return cursor.fetchone()[0]
 
 def get_user_transportation_activity_hours_lasting_to_next_day(limit: bool = False):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting users with activities lasting to next day")
@@ -190,6 +206,7 @@ def get_user_transportation_activity_hours_lasting_to_next_day(limit: bool = Fal
     return cursor.fetchall()
 
 def get_all_users():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all users")
@@ -197,6 +214,7 @@ def get_all_users():
     return cursor.fetchall()
 
 def get_all_activities():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all activities")
@@ -204,6 +222,7 @@ def get_all_activities():
     return cursor.fetchall()
 
 def get_all_trackpoints():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all trackpoints")
@@ -211,6 +230,7 @@ def get_all_trackpoints():
     return cursor.fetchall()
 
 def user_exists(user_id: str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Checking if user exists")
@@ -221,6 +241,7 @@ def user_exists(user_id: str):
     return False
 
 def get_all_activities_for_user(user_id:str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all activities for user")
@@ -229,6 +250,7 @@ def get_all_activities_for_user(user_id:str):
     return cursor.fetchall()
 
 def get_all_trackpoints_for_activity(activity_id:str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all trackpoints for activity")
@@ -237,6 +259,7 @@ def get_all_trackpoints_for_activity(activity_id:str):
     return cursor.fetchall()
 
 def get_all_valid_trackpoints(activity_id:str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting all valid trackpoints for activity")
@@ -244,6 +267,7 @@ def get_all_valid_trackpoints(activity_id:str):
     return cursor.fetchall()
 
 def insert_user(user_id:str, has_labels:bool):
+    assert False, "Todo: not implemented"
     global cursor, db_connection
     check_initiated()
     _ = performance.Timer("(Database) Inserting user")
@@ -251,6 +275,7 @@ def insert_user(user_id:str, has_labels:bool):
     db_connection.commit()
 
 def insert_activity(id:str, user_id:str, transportation_mode:str, start_date_time:datetime.datetime, end_date_time:datetime.datetime):
+    assert False, "Todo: not implemented"
     global cursor, db_connection
     check_initiated()
     _ = performance.Timer("(Database) Inserting activity")
@@ -258,6 +283,7 @@ def insert_activity(id:str, user_id:str, transportation_mode:str, start_date_tim
     db_connection.commit()
 
 def insert_trackpoint(activity_id:str, lat:str, lon:str, altitude:str, date_days:str, date_time:datetime.datetime):
+    assert False, "Todo: not implemented"
     global cursor, db_connection
     check_initiated()
     _ = performance.Timer("(Database) Inserting trackpoint")
@@ -265,6 +291,7 @@ def insert_trackpoint(activity_id:str, lat:str, lon:str, altitude:str, date_days
     db_connection.commit()
 
 def get_distinct_transportation_modes():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting distinct transportation modes")
@@ -272,6 +299,7 @@ def get_distinct_transportation_modes():
     return cursor.fetchall()
 
 def get_users_longest_distance_one_day_per_trasnsportation_mode():
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Getting users longest distance one day per trasnportation mode")
@@ -279,6 +307,7 @@ def get_users_longest_distance_one_day_per_trasnsportation_mode():
     return cursor.fetchall()
 
 def count_user_activity_transportation_mode(user_id: str, transportation_mode: str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Count user activity transportation mode")
@@ -286,6 +315,7 @@ def count_user_activity_transportation_mode(user_id: str, transportation_mode: s
     return cursor.fetchone()[0]
 
 def find_user_id_from_activity_id(activity_id: str):
+    assert False, "Todo: not implemented"
     global cursor
     check_initiated()
     _ = performance.Timer("(Database) Find user id from activity id")

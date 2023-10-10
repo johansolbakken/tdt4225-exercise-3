@@ -33,24 +33,25 @@ class App:
         Database.shutdown()
 
     def run(self):
+        pass
         # -------------- Part 1 --------------
-        log.log("Task 1", "TASK")
+        #log.log("Task 1", "TASK")
 
-        if self.__nuke:
-            _ = performance.Timer("(App) App nuke database")
-            Database.nuke_database()
+        #if self.__nuke:
+        #    _ = performance.Timer("(App) App nuke database")
+        #    Database.nuke_database()
 
-        if self.should_reset_db():
-            _ = performance.Timer("(App) App reset database")
-            self.reset_db()
+        #if self.should_reset_db():
+        #    _ = performance.Timer("(App) App reset database")
+        #    self.reset_db()
 
         # -------------- Part 2 --------------    
         # every assignment is a method in the Assignment class this runs all of them
-        assignment = Assignment.Assignment()
-        methods = assignment.methods()
-        for method in methods:
-            log.log(assignment.format_title(method), "TASK")
-            getattr(assignment, method)()
+        #assignment = Assignment.Assignment()
+        #methods = assignment.methods()
+        #for method in methods:
+        #    log.log(assignment.format_title(method), "TASK")
+        #    getattr(assignment, method)()
 
     def should_reset_db(self):
         if self.__nuke:
