@@ -16,7 +16,7 @@ import pickle
 import db as Database
 
 class Trackpoint:
-    def __init__(self, id: int, activity_id: int, lat: float, lon: float, altitude: float, date_days: float, date_time: datetime.datetime) -> None:
+    def __init__(self, id: int, activity_id: int, lat: float, lon: float, altitude: float, date_days: float, date_time: datetime.datetime, user_id:str) -> None:
         self.id = id
         self.activity_id = activity_id
         self.lat = lat
@@ -24,6 +24,7 @@ class Trackpoint:
         self.altitude = altitude
         self.date_days = date_days
         self.date_time = date_time
+        self.user_id = user_id
 
 class Activity:
     def __init__(self, id: int, user_id: str, transportation_mode: str, start_date_time: datetime.datetime, end_date_time: datetime.datetime) -> None:
@@ -90,7 +91,7 @@ def generate_trackpoints_for(dataset_folder: str, user_id:str, activity_id:str) 
                 log.error(f'Could not convert date_time={date_time} to datetime, in file {activity_file} on line {lineno + 1}')
                 exit(-1)
 
-            trackpoint = Trackpoint(0,  activity_id + user_id, lat, lon, altitude, date_days, date_time)
+            trackpoint = Trackpoint(0,  activity_id + user_id, lat, lon, altitude, date_days, date_time, user_id)
             trackpoints.append(trackpoint)
 
     return trackpoints
@@ -195,7 +196,7 @@ def write_dataset_to_cache(users: list[User], filename:str="data/memcache.pkl"):
 def load_dataset_from_cache(filename:str="data/memcache.pkl") -> list[User]:
     with open(filename, 'rb') as f:
         users = pickle.load(f)
-    return users    
+    return users
 
 def upload_data(data: list[User]=[]):
     _ = performance.Timer("(Database) Uploading data")
@@ -208,17 +209,24 @@ def upload_data(data: list[User]=[]):
         percentage = (i+1)/len(data) * 100
         _ = performance.Timer(f"\tUploading data for user {user.id} ({percentage:.2f}%)")
 
-        if user.has_label:
-            Database.insert_user(user.id, 1)
-        else:
-            Database.insert_user(user.id, 0)
+        Database.insert_user(user.id, user.has_label)
 
         for activity in user.activities:
             Database.insert_activity(activity.id, activity.user_id, activity.transportation_mode, activity.start_date_time, activity.end_date_time)
 
             for trackpoint in activity.trackpoints:
-                Database.insert_trackpoint(trackpoint.activity_id, trackpoint.lat, trackpoint.lon, trackpoint.altitude, trackpoint.date_days, trackpoint.date_time)
+                Database.insert_trackpoint(trackpoint.activity_id, trackpoint.lat, trackpoint.lon, trackpoint.altitude, trackpoint.date_days, trackpoint.date_time, user.id)
         log.enabled(True)
+    return
+
+def load_dataset(dataset_folder: str) -> list[User]:
+    _ = performance.Timer("Load dataset")
+    users = generate_dataset(dataset_folder)
+    return users
+
+def save_dataset_to_cache(users: list[User], filename:str="data/memcache.pkl"):
+    _ = performance.Timer("Save dataset to cache")
+    write_dataset_to_cache(users, filename)
 
 def get_whole_data_set() -> list[User]:
     _ = performance.Timer("Get whole data set")
@@ -251,17 +259,37 @@ def get_all_users() -> list[User]:
     users = []
 
     for user_row in users_table:
-        user = User(user_row[0], user_row[1])
+        user = User(user_row["_id"], user_row["has_labels"])
         users.append(user)
 
     return users
+
+def get_all_valid_trackpoints(activity_id):
+    trackpoint_table = Database.get_all_valid_trackpoints(activity_id)
+    trackpoints = []
+
+    for trackpoint_row in trackpoint_table:
+        trackpoint = Trackpoint(trackpoint_row["_id"], trackpoint_row["activity_id"], trackpoint_row["lat"], trackpoint_row["lon"], trackpoint_row["altitude"], trackpoint_row["date_days"], trackpoint_row["date_time"], trackpoint_row["user_id"])
+        trackpoints.append(trackpoint)
+
+    return trackpoints
+
+def get_all_trackpoints_for_user(user_id: str) -> list[Trackpoint]:
+    trackpoint_table = Database.get_all_trackpoints_for_user(user_id)
+    trackpoints = []
+
+    for trackpoint_row in trackpoint_table:
+        trackpoint = Trackpoint(trackpoint_row["_id"], trackpoint_row["activity_id"], trackpoint_row["lat"], trackpoint_row["lon"], trackpoint_row["altitude"], trackpoint_row["date_days"], trackpoint_row["date_time"], trackpoint_row["user_id"])
+        trackpoints.append(trackpoint)
+
+    return trackpoints
 
 def get_all_activities_for_user(user_id: str) -> list[Activity]:
     activity_table = Database.get_all_activities_for_user(user_id)
     activities = []
 
     for activity_row in activity_table:
-        activity = Activity(activity_row[0], activity_row[1], activity_row[2], activity_row[3], activity_row[4])
+        activity = Activity(activity_row["_id"], activity_row["user_id"], activity_row["transportation_mode"], activity_row["start_date_time"], activity_row["end_date_time"])
         activities.append(activity)
 
     return activities
@@ -271,13 +299,13 @@ def get_all_trackpoints_for_activity(activity_id: str) -> list[Trackpoint]:
     trackpoints = []
 
     for trackpoint_row in trackpoint_table:
-        trackpoint = Trackpoint(trackpoint_row[0], trackpoint_row[1], trackpoint_row[2], trackpoint_row[3], trackpoint_row[4], trackpoint_row[5], trackpoint_row[6])
+        trackpoint = Trackpoint(trackpoint_row["_id"], trackpoint_row["activity_id"], trackpoint_row["lat"], trackpoint_row["lon"], trackpoint_row["altitude"], trackpoint_row["date_days"], trackpoint_row["date_time"], trackpoint_row["user_id"])
         trackpoints.append(trackpoint)
 
     return trackpoints
 
 def get_transportation_modes():
-    return [x[0] for x in Database.get_distinct_transportation_modes()]
+    return Database.get_distinct_transportation_modes()
 
 
 def get_all_trackpoints() -> list[Trackpoint]:
@@ -285,7 +313,17 @@ def get_all_trackpoints() -> list[Trackpoint]:
     trackpoints = []
 
     for trackpoint_row in trackpoint_table:
-        trackpoint = Trackpoint(trackpoint_row[0], trackpoint_row[1], trackpoint_row[2], trackpoint_row[3], trackpoint_row[4], trackpoint_row[5], trackpoint_row[6])
+        trackpoint = Trackpoint(trackpoint_row["_id"], trackpoint_row["activity_id"], trackpoint_row["lat"], trackpoint_row["lon"], trackpoint_row["altitude"], trackpoint_row["date_days"], trackpoint_row["date_time"])
         trackpoints.append(trackpoint)
 
     return trackpoints
+
+def get_all_activities_for_user_for_transportation_mode_year(user_id: str, transportation_mode: str, year:int) -> list[Activity]:
+    activity_table = Database.get_activities_transportation_by_user_in_year(user_id=user_id, transportation_mode=transportation_mode, year=year)
+    activities = []
+
+    for activity_row in activity_table:
+        activity = Activity(activity_row["_id"], activity_row["user_id"], activity_row["transportation_mode"], activity_row["start_date_time"], activity_row["end_date_time"])
+        activities.append(activity)
+
+    return activities

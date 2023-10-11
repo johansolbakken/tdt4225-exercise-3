@@ -69,32 +69,43 @@ def find_the_number_of_users_which_have_been_close_to_each_other_in_time_and_spa
 
 def calculate_activity_elevation(activity: Model.Activity) -> float:
     s = 0
-    trackpoints = Database.get_all_valid_trackpoints(activity.id)
+    trackpoints = Model.get_all_valid_trackpoints(activity.id)
     for i in range(len(trackpoints) - 1):
-        tn = trackpoints[i][0]
-        tn1 = trackpoints[i + 1][0]
-        if tn < tn1:
-            s += tn1 - tn
+        tn = trackpoints[i]
+        tn1 = trackpoints[i + 1]
+        if tn.altitude > tn1.altitude:
+            s += tn.altitude - tn1.altitude
     return s
 
 def find_highest_elevation(user: Model.User) -> float:
     highest = 0
     activities = Model.get_all_activities_for_user(user.id)
+    progress = Performance.ProgressEstimator(len(activities), enabled=False)
     for activity in activities:
         activity_elevation = calculate_activity_elevation(activity)
         if activity_elevation > highest:
             highest = activity_elevation
+        progress.increment()
+        Log.enabled(True)
+        progress.print()
+        Log.enabled(False)
     return highest
 
-def top_n_users_gained_most_elevation(n: int=15):
+def top_n_users_gained_most_elevation(n: int=20):
     _ = Performance.Timer("(Algoritmo) top_n_users_gained_most_elevation")
     Log.enabled(False)
     
     elevators = []
     users = Model.get_all_users()
+
+    progress = Performance.ProgressEstimator(len(users), enabled=False)
     for user in users:
         highest_elevation = find_highest_elevation(user)
         elevators.append((user.id, feet_to_meters(highest_elevation)))
+        progress.increment()
+        Log.enabled(True)
+        progress.print()
+        Log.enabled(False)
 
     Log.enabled(True)
 
@@ -133,6 +144,7 @@ def users_count_invalid_activities():
     user_invalid_map = {}
 
     Log.enabled(False)
+    progress = Performance.ProgressEstimator(len(users), enabled=False)
     for user in users:
         count = 0
         activities = Model.get_all_activities_for_user(user.id)
@@ -140,6 +152,10 @@ def users_count_invalid_activities():
             if check_invalid_activity(activity):
                 count += 1
         user_invalid_map[user.id] = count
+        progress.increment()
+        Log.enabled(True)
+        progress.print()
+        Log.enabled(False)
     Log.enabled(True)
 
     table = [(k, v) for k,v in user_invalid_map.items()]
@@ -158,7 +174,7 @@ def users_favorite_transportation_mode():
         count = 0
         fav = ""
         for mode in transportation_modes:
-            mode_count = Database.count_user_activity_transportation_mode(user.id, mode)
+            mode_count = Database.count_activities_where_user_transportation_mode(user.id, mode)
             if mode_count > count:
                 count = mode_count
                 fav = mode
@@ -169,3 +185,47 @@ def users_favorite_transportation_mode():
     table = [(k, v) for k,v in user_favorite_transportation_mode_hash.items()]
     table.sort(key=lambda x: x[0])
     return table
+
+def trackpoints_distance_km(trackpoints: list[Model.Trackpoint]) -> float:
+    distance = 0
+    for i in range(len(trackpoints) - 1):
+        tn = trackpoints[i]
+        tn1 = trackpoints[i + 1]
+        distance += haversine.haversine((tn.lat, tn.lon), (tn1.lat, tn1.lon), unit=haversine.Unit.KILOMETERS)
+    return distance
+
+def distance_km_travedled_by_user_in_year(user_id, transportation_mode, year):
+    _ = Performance.Timer("(Algoritmo) distance_km_travedled_by_user_in_year")
+    Log.enabled(False)
+    activities = Model.get_all_activities_for_user_for_transportation_mode_year(user_id=user_id, transportation_mode=transportation_mode, year=year)
+    total_distance = 0
+    for activity in activities:
+        trackpoints = Model.get_all_trackpoints_for_activity(activity.id)
+        total_distance += trackpoints_distance_km(trackpoints)
+    Log.enabled(True)
+    return total_distance
+
+def user_has_been_within_radius_km(user_id, position, radius):
+    lat, lon = position
+    trackpoints = Model.get_all_trackpoints_for_user(user_id)
+    for trackpoint in trackpoints:
+        if haversine.haversine((trackpoint.lat, trackpoint.lon), (lat, lon), unit=haversine.Unit.KILOMETERS) <= radius:
+            return True
+    return False
+
+def fetch_users_within_radius_km(position, radius):
+    lat, lon = position
+
+    users = Model.get_all_users()
+    users_within_radius = []
+    Log.enabled(False)
+    progress = Performance.ProgressEstimator(len(users), enabled=False)
+    for user in users:
+        if user_has_been_within_radius_km(user.id, position, radius):
+            users_within_radius.append((user.id,))
+        progress.increment()
+        Log.enabled(True)
+        progress.print()
+        Log.enabled(False)
+    Log.enabled(True)
+    return users_within_radius

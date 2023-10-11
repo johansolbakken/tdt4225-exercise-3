@@ -33,6 +33,7 @@ class App:
         Database.shutdown()
 
     def run(self):
+        _ = performance.Timer("(App) App run")
         # -------------- Part 1 --------------
         log.log("Task 1", "TASK")
 
@@ -46,11 +47,14 @@ class App:
 
         # -------------- Part 2 --------------    
         # every assignment is a method in the Assignment class this runs all of them
-        #assignment = Assignment.Assignment()
-        #methods = assignment.methods()
-        #for method in methods:
-        #    log.log(assignment.format_title(method), "TASK")
-        #    getattr(assignment, method)()
+        assignment = Assignment.Assignment()
+        methods = assignment.methods()
+        skip_lsit = []
+        for method in methods:
+            if method in skip_lsit:
+                continue
+            log.log(assignment.format_title(method), "TASK")
+            getattr(assignment, method)()
 
     def should_reset_db(self):
         if self.__nuke:
@@ -65,13 +69,12 @@ class App:
         return False
 
     def reset_db(self):
-        # if self.cache_exists():
-        #     data = Model.load_dataset_from_cache(self.__cachefile)
-        # else:
-        #     data = Model.load_dataset(self.__dataset)
-
-        # Model.upload_data(data)
-        pass
+        if self.cache_exists():
+            data = Model.load_dataset_from_cache(self.__cachefile)
+        else:
+            data = Model.load_dataset(self.__dataset)
+            Model.save_dataset_to_cache(data, self.__cachefile)
+        Model.upload_data(data)
 
     def set_dataset(self, dataset):
         self.__dataset = dataset

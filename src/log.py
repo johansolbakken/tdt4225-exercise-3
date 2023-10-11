@@ -14,6 +14,7 @@ colors = {
     "INFO": "\033[1;34m",
     "TIMER": "\033[1;30m",
     "TASK": "\033[1;35m",
+    "PROGRESS": "\033[1;36m",
 }
 
 __enabled = True
@@ -41,6 +42,9 @@ def info(msg: str):
 
 def timer(msg: str):
     log(msg, "TIMER")
+
+def progress(msg: str):
+    log(msg, "PROGRESS")
 
 def enabled(enabled: bool):
     global __enabled

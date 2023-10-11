@@ -42,8 +42,3 @@ class DbConnector:
         # close the DB connection
         self.client.close()
         log.info(f"(Database) Connection to {self.db.name}-db is closed")
-
-        #MUCHAS GRACIAS AFICION
-        # asdkajsdkaswfdliaqbefabwefklhjbawkdfblkdfbjklwabfjkawlesfblasdbwlfkabslkdfhb
-        # hubby
-        
