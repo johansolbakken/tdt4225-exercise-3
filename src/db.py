@@ -33,12 +33,6 @@ def init():
     client = connector.client
     db = connector.db
 
-    if "activity" in db.list_collection_names():
-        db["activity"].create_index([("altitude", 1)])
-    if "trackpoint" in db.list_collection_names():
-        db["trackpoint"].create_index([("user_id", 1)])
-        db["trackpoint"].create_index([("activity_id", 1)])
-
     initiated = True
 
 
@@ -55,6 +49,14 @@ def check_initiated():
     if initiated == False:
         log.error("(Database) Not initiated. Call db.init() first.")
         raise Exception("(Database) Not initiated. Call db.init() first.")
+    
+def create_indexes():
+    _ = performance.Timer("(Database) Creating indexes")
+    if "activity" in db.list_collection_names():
+        db["activity"].create_index([("altitude", 1)])  
+    if "trackpoint" in db.list_collection_names():
+        db["trackpoint"].create_index([("user_id", 1)])
+        db["trackpoint"].create_index([("activity_id", 1)])
 
 
 def nuke_database():

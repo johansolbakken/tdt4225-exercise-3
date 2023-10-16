@@ -75,6 +75,7 @@ class App:
             data = Model.load_dataset(self.__dataset)
             Model.save_dataset_to_cache(data, self.__cachefile)
         Model.upload_data(data)
+        Database.create_indexes()
 
     def set_dataset(self, dataset):
         self.__dataset = dataset
